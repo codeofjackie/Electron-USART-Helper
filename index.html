@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>串口助手</title>
+    <link rel="stylesheet" href="./node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="index.css">
+  </head>
+  <body>
+    <div class="container-fluid" style="margin-top:10px">
+      <div class="row">
+        <div class="col-lg-6 col-md-6 col-sm-6 unselectable" id="left-page">
+          <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">设置</a></li>
+          </ul>
+          <!-- 标签 -->
+          <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active fade in" id="settings">
+                <div class="input-group form-group">
+                    <select class="form-control input-sm" id="PortList">
+                    </select>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default btn-sm" type="button" id="OpenSerial">打开串口</button>
+                        <button class="btn btn-default btn-sm" type="button" id="SaveSettings">保存设置</button>
+                    </span>
+                </div>
+                <div class="input-group form-group">
+                    <label class="input-group-addon">
+                        波特率
+                    </label>
+                    <select class="form-control input-sm" id="BaudRate">
+                      <option value="300">300</option>
+                      <option value="600">600</option>
+                      <option value="1200">1200</option>
+                      <option value="2400">2400</option>
+                      <option value="4800">4800</option>
+                      <option value="9600">9600</option>
+                      <option value="19200">19200</option>
+                      <option value="57600">57600</option>
+                      <option value="115200" selected>115200</option>
+                    </select>
+                </div>
+                <div class="input-group form-group">
+                    <label class="input-group-addon">
+                        数据位
+                    </label>
+                    <select class="form-control input-sm" id="DataBits">
+                      <option value="5">5</option>
+                      <option value="6">6</option>
+                      <option value="7">7</option>
+                      <option value="8" selected>8</option>
+                    </select>
+                </div>
+                <div class="input-group form-group">
+                    <label class="input-group-addon">
+                        停止位
+                    </label>
+                    <select class="form-control input-sm" id="StopBits">
+                      <option value="1" selected>1</option>
+                      <option value="2">2</option>
+                    </select>
+                </div>
+                <div class="input-group form-group">
+                    <label class="input-group-addon">
+                        校验位
+                    </label>
+                    <select class="form-control input-sm" id="CheckBit">
+                      <option value="none" selected>none</option>
+                      <option value="odd">odd</option>
+                      <option value="even">even</option>
+                    </select>
+                </div>
+                <div class="input-group form-group">
+                    <label class="input-group-addon">
+                        发送数据格式
+                    </label>
+                    <select class="form-control input-sm" id="SendDataFormat">
+                      <option value="16进制" selected>16进制</option>
+                      <option value="字符串">字符串</option>
+                    </select>
+                </div>
+                <div class="input-group form-group">
+                    <label class="input-group-addon">
+                        接收数据格式
+                    </label>
+                    <select class="form-control input-sm">
+                      <option value="16进制">16进制</option>
+                      <option value="字符串" selected>字符串</option>
+                    </select>
+                </div>
+                <div class="input-group form-group">
+                  <span class="input-group-addon">
+                    <input type="checkbox" id="Timer" aria-label="...">
+                    定时发送
+                  </span>
+                  <span class="input-group-addon">
+                      每
+                  </span>
+                  <input type="text" id="Interval" class="form-control input-sm " aria-label="...">
+                  <span class="input-group-addon">
+                      毫秒
+                  </span>
+                </div><!-- /input-group -->
+                <div class="input-group form-group">
+                    <input type="text" class="form-control input-sm" id="SendMsg"></input>
+                    <span class="input-group-btn">
+                        <button class="btn btn-default btn-sm" type="button" id="Send">发送!</button>
+                    </span>
+                </div>
+                
+            </div>
+            <!-- 设置 -->
+          </div>
+          <!-- 标签容器内容 -->
+        </div>
+        <!-- 设置和自定义标签组 -->
+
+        <!-- 接收信息 -->
+        <div class="col-lg-6 col-md-6 col-sm-6">
+          <div class="row">
+              <div class="container-fluid">
+                <div class="form-control" id="textArea" readonly>
+                </div>
+              </div>
+              <!-- 显示接收窗口 -->
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="navbar-fixed-bottom statusbar unselectable">
+      <p>波特率：</p><p name="BaudRate"></p>
+      <p>数据位：</p><p name="DataBits"></p>
+      <p>停止位：</p><p name="StopBits"></p>
+      <p>校验位：</p><p name="CheckBit"></p>
+      <p class="pull-right" onclick="clearText()">清空</p>
+      <style>
+        p.pull-right {
+          margin-left: 0px;
+          margin-right: 0px;
+          padding-left: 10px;
+          padding-right: 10px;
+        }
+        p.pull-right:hover{
+          background-color: rgb(65, 122, 230);
+          cursor: pointer;
+        }
+      </style>
+    </div>
+  </body>
+  <script>require('./index.js');</script>
+</html>

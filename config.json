@@ -1,0 +1,1 @@
+{"BaudRate":"115200","DataBits":8,"StopBits":"1","CheckBit":"odd","SendDataFormat":"16进制","RecvDataFormat":"字符串","Interval":"1000"}
