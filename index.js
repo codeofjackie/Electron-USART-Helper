@@ -1,5 +1,4 @@
 // 依赖
-
 window.$ = window.jQuery = require('./node_modules/jquery/dist/jquery.min.js');
 require('./node_modules/bootstrap/dist/js/bootstrap.min.js');
 require('./node_modules/bootstrap/js/tab.js');
@@ -18,12 +17,55 @@ SerialPort.list((err, ports) => {
     alert('未找到串口');
   }
   else {
+    var buttons = document.getElementsByClassName('custom-button');
+    for (let index = 0; index < buttons.length; index++) {
+      buttons[index].removeAttribute('disabled');; 
+    }
+    $('#ToggleSerial,#Send').removeAttr('disabled');
     ports.forEach(port => {
-      $('PortList').append('<option value="'+port[i].comName+'">'+ port[i].comName +'</option>')  
+      let option = document.createElement("option");
+      option.value = port.comName;
+      option.append(port.comName);
+      document.getElementById('PortList').append(option);
     });
   }
 });
 
+// 全局状态
+class status {
+  constructor(Name){
+      this.BaudRate=115200;
+      this.DataBits=8;
+      this.StopBits=1;
+      this.CheckBit='none';
+      this.SendDataFormat='16进制';
+      this.RecvDataFormat='字符串';
+      this.connected=false;
+      this.Timer=false;
+      this.Interval=1000;
+      this.SendMsg="";
+      this.comName=Name;
+      this.CurrentPort= undefined;
+  }
+  save() {
+    let settings = {
+      "BaudRate":this.BaudRate,
+      "DataBits":this.DataBits,
+      "StopBits":this.StopBits,
+      "CheckBit":this.CheckBit,
+      "SendDataFormat":this.SendDataFormat,
+      "RecvDataFormat":this.RecvDataFormat,
+      "Timer":this.Timer,
+      "Interval":this.Interval
+    }
+
+    fs.writeFile(__dirname+"\\config.json",JSON.stringify(settings),function(){});
+  }
+}
+
+GlobalStatus = new status(document.getElementById('PortList').value);
+
+//读取自定义按钮配置文件
 function ReadJSON(path,callback) {
   fs.open(path,'r',function (err,fd) {
     if (err!=null) {
@@ -44,42 +86,6 @@ function ReadJSON(path,callback) {
     }
   });
 }
-// 全局状态
-
-class status {
-  constructor(){
-      this.BaudRate=115200;
-      this.DataBits=8;
-      this.StopBits=1;
-      this.CheckBit='无';
-      this.SendDataFormat='16进制';
-      this.RecvDataFormat='字符串';
-      this.connected=false;
-      this.Timer=false;
-      this.Interval=1000;
-      this.SendMsg="";
-  };
-
-  save() {
-    let settings = {
-      "BaudRate":this.BaudRate,
-      "DataBits":this.DataBits,
-      "StopBits":this.StopBits,
-      "CheckBit":this.CheckBit,
-      "SendDataFormat":this.SendDataFormat,
-      "RecvDataFormat":this.RecvDataFormat,
-      "Timer":this.Timer,
-      "Interval":this.Interval
-    }
-
-    fs.writeFile(__dirname+"\\config.json",JSON.stringify(settings),function(){});
-  }
-
-};
-
-GlobalStatus = new status();
-
-
 //设置标签页和按钮
 function setCustomTabs(data) {
   for (let index = 0; index < data.panel.length; index++) {
@@ -111,13 +117,12 @@ function setCustomTabs(data) {
     $('div.tab-content').append(tab);
   }
 }
-
 //加载自定义界面配置
 function loadUI() {
   ReadJSON(__dirname+'\\ui.json',function (data) {
     setCustomTabs(data);  
   });
-  $('#OpenSerial').attr('disabled','disabled');
+  $('#ToggleSerial').attr('disabled','disabled');
   $('#Send').attr('disabled','disabled');
   $('#Timer').attr('disabled','disabled');
 }
@@ -151,82 +156,74 @@ function loadSettings() {
     alert('加载设置失败！');
   }
 }
-
 //保存设置
 $('button#SaveSettings').click(function () {
     GlobalStatus.save();
 });
-
-//设置选项
+//设置选项或者选择串口时的改变
 $('select,input').change(function () {
-    if ($(this).attr('type')=='checkbox') {
-        GlobalStatus[$(this).attr('id')]=$(this)[0].checked;
-    }
-    else {
-        tag = $(this).attr('id');
-        GlobalStatus[tag]=$(this).val();
-        try { 
-        $('p[name='+tag+']')[0].innerText = $(this).val();
-        }catch(err){}
-    }
+  if ($(this).attr('type')=='checkbox') {
+      GlobalStatus[$(this).attr('id')]=$(this)[0].checked;
+  }
+  else if ($(this).attr('id')=='PortList') {
+    GlobalStatus.comName = $(this).val();
+  }
+  else {
+      tag = $(this).attr('id');
+      GlobalStatus[tag]=$(this).val();
+      try { 
+      $('p[name='+tag+']')[0].innerText = $(this).val();
+      }catch(err){}
+  }
 })
 
-//按钮点击回弹效果。
-$('button.btn').click(function() {
-    $(this).blur();
-});
-
-//选择串口
-$('#PortList').change(()=>{
-    GlobalStatus.CurrentPort = new SerialPort($(this.val()),
-        {
-            autoOpen: false ,
-            baudRate: GlobalStatus.BaudRate,
-            stopBits:GlobalStatus.StopBits,
-            dataBits:GlobalStatus.DataBits,
-            parity:GlobalStatus.CheckBit
-        },
-        function (err) {
-            if (err) alert(err);
-            else $('#OpenSerial').removeAttr('disabled');
-        }
-    );
-})
-
-//打开端口
-$('#OpenSerial').click(()=>{
-    GlobalStatus.CurrentPort.open(function (err) {
-        if (err) alert(err);
-        else {
-            $(this)[0].innerText = "关闭串口";
-            $(this).attr('id','CloseSerial');
+//响应打开/关闭端口事件
+$('#ToggleSerial').click(function(){
+    if ($(this).val()=='closed') {
+      GlobalStatus.CurrentPort = new SerialPort(GlobalStatus.comName,
+      {
+          autoOpen: true ,
+          baudRate: GlobalStatus.BaudRate,
+          stopBits:GlobalStatus.StopBits,
+          dataBits:GlobalStatus.DataBits,
+          parity:GlobalStatus.CheckBit
+      },
+      function (err) {
+          if (err) alert(err);
+          else {
+            $('#ToggleSerial').val('opened');
+            $('#ToggleSerial')[0].innerText = "关闭串口";
             $('#Send').removeAttr('disabled');
             $('.button-custom').removeAttr('disabled');
-            $('#Timer').removeAttr('disabled');
-            //接收消息
+            $('select').attr('disabled','disabled');//禁止所有选择框
+
+            //设置接收过程
             GlobalStatus.CurrentPort.on('readable', function (err) {
-              if(err)console.log('当前串口不可读');
+              if(err) alert(err);
               else {
                 textarea = document.getElementById('textArea');
                 let date = new Date();
                 textarea.append($('<p class="txtStyle">'+
                 date.toLocaleString()+' '+date.getMilliseconds()+'\n'+'</p>')[0]);
-                textarea.append($('<p class="txtStyle txt">'+ GlobalStatus.CurrentPort.read() +'\n'+'</p>')[0]);
+                textarea.append($('<p class="txtStyle txt">'+ GlobalStatus.CurrentPort.read(8) +'\n'+'</p>')[0]);
               }
             });
+          }
         }
-    })
-});
-
-//关闭串口
-$("#CloseSerial").click(()=>{
-    GlobalStatus.CurrentPort.close((err)=>{
-        if (err) alert(err);
-        else {
-          $('#Send').attr('disabled','disabled');
-          $('.button-custom').attr('disabled','disabled');
-        }
-    })
+      );
+    }
+    else if($(this).val()=='opened') {
+      GlobalStatus.CurrentPort.close((err)=>{
+          if (err) alert(err);
+          else {
+            $('#ToggleSerial').val('closed');
+            $('#ToggleSerial')[0].innerText = "打开串口";
+            $('#Send').attr('disabled','disabled');//禁用一般的发送按钮
+            $('.button-custom').attr('disabled','disabled');//禁用自定义发送按钮
+          }
+      });
+      delete GlobalStatus.CurrentPort;
+    }
 });
 
 //发送消息
@@ -241,11 +238,7 @@ function SendMsg(msg) {
         }
     catch (err){alert(err);}
 }
-
-function clearText(){
-$('#textArea').empty();
-}
-//发送
+//普通按钮发送
 $('button#Send').click(function () {
     var msg = $('input#SendMsg').val();
     if (msg!=""){
@@ -253,7 +246,6 @@ $('button#Send').click(function () {
     SendMsg(msg);
     }
 });
-
 //自定义按钮的发送
 function SendPreset(param) {
     param.blur();
@@ -264,6 +256,7 @@ function SendPreset(param) {
     }
 }
 // 不知道为什么存在一些问题。原因是jQuery只能对静态的DOM绑定事件，不能对动态生成的button绑定事件。
+//定时发送
 var timer;
 $('#Timer').change(function () {
         let msg = $('input#SendMsg').val();
@@ -281,15 +274,12 @@ $('#Timer').change(function () {
         clearInterval(timer);
     }
 });
-  
 
 // 为什么这些事件响应函数要放到最后？
-
-/*
-*
-*   下面是主流程。
-*
-*/
+//按钮点击回弹效果。
+$('button.btn').click(function() {
+  $(this).blur();
+});
 
 loadUI();
 loadSettings();

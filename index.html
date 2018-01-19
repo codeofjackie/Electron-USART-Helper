@@ -20,7 +20,7 @@
                     <select class="form-control input-sm" id="PortList">
                     </select>
                     <span class="input-group-btn">
-                        <button class="btn btn-default btn-sm" type="button" id="OpenSerial">打开串口</button>
+                        <button class="btn btn-default btn-sm" type="button" id="ToggleSerial" value="closed">打开串口</button>
                         <button class="btn btn-default btn-sm" type="button" id="SaveSettings">保存设置</button>
                     </span>
                 </div>
@@ -133,6 +133,11 @@
       <p>停止位：</p><p name="StopBits"></p>
       <p>校验位：</p><p name="CheckBit"></p>
       <p class="pull-right" onclick="clearText()">清空</p>
+      <script>
+        function clearText(){
+          $('#textArea').empty();
+        }
+      </script>
       <style>
         p.pull-right {
           margin-left: 0px;
