@@ -12,6 +12,7 @@
   "dependencies": {
     "bootstrap": "3.3.7",
     "bootstrap-select": "^1.12.4",
+    "highcharts": "^6.0.4",
     "jquery": "latest",
     "materialize-css": "^0.100.2",
     "serialport": "^6.0.4"

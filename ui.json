@@ -1,26 +1,6 @@
 {
     "panel":[
         {
-            "name":"这是一个测试",
-            "button":[
-                {
-                    "tags":"Eat",
-                    "value":"Eat"
-                },{
-                    "tags":"Sleep",
-                    "value":"Sleep"
-                },{
-                    "tags":"Run",
-                    "value":"Run"
-                },{
-                    "tags":"Sleep",
-                    "value":"Sleep"
-                },{
-                    "tags":"Run",
-                    "value":"Run"
-                }
-            ]
-        },{
             "name":"测试",
             "button":[
                 {

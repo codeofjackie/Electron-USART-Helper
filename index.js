@@ -4,7 +4,21 @@ require('./node_modules/bootstrap/dist/js/bootstrap.min.js');
 require('./node_modules/bootstrap/js/tab.js');
 var path = require('path');
 var fs = require('fs');
-var SerialPort = require('serialport')
+var SerialPort = require('serialport');
+
+const BrowserWindow = require('electron').remote.BrowserWindow;
+
+const newWindowBtn = document.getElementById('new-window');
+
+newWindowBtn.addEventListener('click', function (event) {
+  const modalPath = path.join('file://', __dirname, './canvas.html')
+  let win = new BrowserWindow({width: 750, height: 490,frame: true});
+  //创建一个新窗口宽：400px，高：320px
+  //ES6新增了let
+  win.on('closed', function () { win = null });
+  win.loadURL(modalPath);
+  win.show();//打开一个窗口
+})
 
 //初始化串口列表
 SerialPort.list((err, ports) => {

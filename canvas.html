@@ -1,0 +1,73 @@
+<html>
+<head>
+</head>
+<body>
+<div id="container">哈哈哈</div>
+<script>
+//加载highcharts
+var Highcharts = require('highcharts');
+
+// 在 Highcharts 加载之后加载功能模块
+require('highcharts/modules/exporting')(Highcharts);
+// 创建图表
+Highcharts.chart('container', { 
+    chart: {
+            type: 'line',
+            zoomType: 'x'
+    },
+    title: {
+        text: '车辆轨迹和坐标'
+    },
+    yAxis: {
+        title: {
+            text: 'y方向'
+        }
+    },
+	xAxis: {
+        title: {
+            text: 'x方向'
+        }
+    },
+    legend: {
+        layout: 'vertical',
+        align: 'right',
+        verticalAlign: 'middle'
+    },
+    plotOptions: {
+        series: {
+            label: {
+                connectorAllowed: false
+            },
+            pointStart: 0
+        }
+    },
+    series: [{
+        name: '当前车辆轨迹',
+		lineWidth: 0,
+        data: [ 
+			[12, 2],
+			[24, 12],
+			[36, 2],
+			[48, 12],
+			[100,18],
+			[1000,20]
+		]
+    }],
+    responsive: {
+        rules: [{
+            condition: {
+                maxWidth: 500
+            },
+            chartOptions: {
+                legend: {
+                    layout: 'horizontal',
+                    align: 'center',
+                    verticalAlign: 'bottom'
+                }
+            }
+        }]
+    }
+});
+</script>
+</body>
+</html>
