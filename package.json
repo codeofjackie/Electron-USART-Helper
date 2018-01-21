@@ -13,7 +13,6 @@
     "bootstrap": "3.3.7",
     "bootstrap-select": "^1.12.4",
     "jquery": "latest",
-    "material-ui": "^1.0.0-beta.29",
     "materialize-css": "^0.100.2",
     "serialport": "^6.0.4"
   },
