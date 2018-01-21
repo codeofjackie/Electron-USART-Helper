@@ -19,7 +19,7 @@ SerialPort.list((err, ports) => {
   else {
     var buttons = document.getElementsByClassName('custom-button');
     for (let index = 0; index < buttons.length; index++) {
-      buttons[index].removeAttribute('disabled');; 
+      buttons[index].removeAttribute('disabled');
     }
     $('#ToggleSerial,#Send').removeAttr('disabled');
     ports.forEach(port => {
@@ -27,6 +27,7 @@ SerialPort.list((err, ports) => {
       option.value = port.comName;
       option.append(port.comName);
       document.getElementById('PortList').append(option);
+      GlobalStatus.comName = port.comName;
     });
   }
 });
@@ -44,7 +45,7 @@ class status {
       this.Timer=false;
       this.Interval=1000;
       this.SendMsg="";
-      this.comName=Name;
+      this.comName=document.getElementById('PortList').value;
       this.CurrentPort= undefined;
   }
   save() {
@@ -63,7 +64,7 @@ class status {
   }
 }
 
-GlobalStatus = new status(document.getElementById('PortList').value);
+GlobalStatus = new status();
 
 //读取自定义按钮配置文件
 function ReadJSON(path,callback) {
@@ -183,9 +184,9 @@ $('#ToggleSerial').click(function(){
       GlobalStatus.CurrentPort = new SerialPort(GlobalStatus.comName,
       {
           autoOpen: true ,
-          baudRate: GlobalStatus.BaudRate,
-          stopBits:GlobalStatus.StopBits,
-          dataBits:GlobalStatus.DataBits,
+          baudRate: parseInt(GlobalStatus.BaudRate),
+          stopBits: parseInt(GlobalStatus.StopBits),
+          dataBits:parseInt(GlobalStatus.DataBits),
           parity:GlobalStatus.CheckBit
       },
       function (err) {
@@ -194,9 +195,8 @@ $('#ToggleSerial').click(function(){
             $('#ToggleSerial').val('opened');
             $('#ToggleSerial')[0].innerText = "关闭串口";
             $('#Send').removeAttr('disabled');
-            $('.button-custom').removeAttr('disabled');
+            document.getElementsByClassName('.button-custom').removeAttribute('disabled');
             $('select').attr('disabled','disabled');//禁止所有选择框
-
             //设置接收过程
             GlobalStatus.CurrentPort.on('readable', function (err) {
               if(err) alert(err);
@@ -229,7 +229,7 @@ $('#ToggleSerial').click(function(){
 //发送消息
 function SendMsg(msg) {
     try {
-            GlobalStatus.write(msg);
+            GlobalStatus.CurrentPort.write(msg);
             textarea = document.getElementById('textArea');
             let date = new Date();
             textarea.append($('<p class="txtStyle">'+
