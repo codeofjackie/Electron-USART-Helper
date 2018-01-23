@@ -11,6 +11,7 @@ const BrowserWindow = require('electron').remote.BrowserWindow;
 const newWindowBtn = document.getElementById('new-window');
 
 newWindowBtn.addEventListener('click', function (event) {
+  fs.writeFile(__dirname+"\\data.json",JSON.stringify(GlobalStatus.CoordinateRecord),function(){});
   const modalPath = path.join('file://', __dirname, './canvas.html')
   let win = new BrowserWindow({width: 750, height: 490,frame: true});
   //创建一个新窗口宽：400px，高：320px
@@ -21,30 +22,32 @@ newWindowBtn.addEventListener('click', function (event) {
 })
 
 //初始化串口列表
-SerialPort.list((err, ports) => {
-  console.log('ports', ports);
-  if (err) {
-    alert(err.message);
-    return;
-  }
-  if (ports.length === 0) {
-    alert('未找到串口');
-  }
-  else {
-    var buttons = document.getElementsByClassName('custom-button');
-    for (let index = 0; index < buttons.length; index++) {
-      buttons[index].removeAttribute('disabled');
+function SerialPortListInit() {
+  SerialPort.list((err, ports) => {
+    console.log('ports', ports);
+    if (err) {
+      alert(err.message);
+      return;
     }
-    $('#ToggleSerial,#Send').removeAttr('disabled');
-    ports.forEach(port => {
-      let option = document.createElement("option");
-      option.value = port.comName;
-      option.append(port.comName);
-      document.getElementById('PortList').append(option);
-      GlobalStatus.comName = port.comName;
-    });
-  }
-});
+    if (ports.length === 0) {
+      alert('未找到串口');
+    }
+    else {
+      var buttons = document.getElementsByClassName('custom-button');
+      for (let index = 0; index < buttons.length; index++) {
+        buttons[index].removeAttribute('disabled');
+      }
+      $('#ToggleSerial,#Send').removeAttr('disabled');
+      ports.forEach(port => {
+        let option = document.createElement("option");
+        option.value = port.comName;
+        option.append(port.comName);
+        document.getElementById('PortList').append(option);
+        GlobalStatus.comName = port.comName;
+      });
+    }
+  });
+} 
 
 // 全局状态
 class status {
@@ -61,6 +64,7 @@ class status {
       this.SendMsg="";
       this.comName=document.getElementById('PortList').value;
       this.CurrentPort= undefined;
+      this.CoordinateRecord = [];
   }
   save() {
     let settings = {
@@ -77,8 +81,6 @@ class status {
     fs.writeFile(__dirname+"\\config.json",JSON.stringify(settings),function(){});
   }
 }
-
-GlobalStatus = new status();
 
 //读取自定义按钮配置文件
 function ReadJSON(path,callback) {
@@ -209,7 +211,7 @@ $('#ToggleSerial').click(function(){
             $('#ToggleSerial').val('opened');
             $('#ToggleSerial')[0].innerText = "关闭串口";
             $('#Send').removeAttr('disabled');
-            document.getElementsByClassName('.button-custom').removeAttribute('disabled');
+            $('.custom-button').removeAttr('disabled');
             $('select').attr('disabled','disabled');//禁止所有选择框
             //设置接收过程
             GlobalStatus.CurrentPort.on('readable', function (err) {
@@ -219,7 +221,9 @@ $('#ToggleSerial').click(function(){
                 let date = new Date();
                 textarea.append($('<p class="txtStyle">'+
                 date.toLocaleString()+' '+date.getMilliseconds()+'\n'+'</p>')[0]);
-                textarea.append($('<p class="txtStyle txt">'+ GlobalStatus.CurrentPort.read(8) +'\n'+'</p>')[0]);
+                var content = GlobalStatus.CurrentPort.read(1);
+                textarea.append($('<p class="txtStyle txt">'+ content +'\n'+'</p>')[0]);
+                GlobalStatus.CoordinateRecord.push([content.readUInt8(),content.readUInt8()+20]);
               }
             });
           }
@@ -242,35 +246,38 @@ $('#ToggleSerial').click(function(){
 
 //发送消息
 function SendMsg(msg) {
-    try {
-            GlobalStatus.CurrentPort.write(msg);
-            textarea = document.getElementById('textArea');
-            let date = new Date();
-            textarea.append($('<p class="txtStyle">'+
-            date.toLocaleString()+' '+date.getMilliseconds()+'\n'+'</p>')[0]);
-            textarea.append($('<p class="txtStyle txt">'+msg+'\n'+'</p>')[0]);
-        }
-    catch (err){alert(err);}
+  try {
+          GlobalStatus.CurrentPort.write(msg);
+          // GlobalStatus.CurrentPort.
+          textarea = document.getElementById('textArea');
+          let date = new Date();
+          textarea.append($('<p class="txtStyle">'+
+          date.toLocaleString()+' '+date.getMilliseconds()+'\n'+'</p>')[0]);
+          textarea.append($('<p class="txtStyle txt">'+msg+'\n'+'</p>')[0]);
+      }
+  catch (err){alert(err);}
+}
+//自定义按钮的发送
+function SendPreset(param) {
+  param.blur();
+  var msg = param.value;
+  if (msg!=""){
+  //发送
+  SendMsg(msg);
+  }
 }
 //普通按钮发送
 $('button#Send').click(function () {
-    var msg = $('input#SendMsg').val();
-    if (msg!=""){
-    //发送
-    SendMsg(msg);
-    }
+  var msg = $('input#SendMsg').val();
+  if (msg!=""){
+  //发送
+  SendMsg(msg);
+  }
 });
-//自定义按钮的发送
-function SendPreset(param) {
-    param.blur();
-    var msg = param.value;
-    if (msg!=""){
-    //发送
-    SendMsg(msg);
-    }
-}
+
 // 不知道为什么存在一些问题。原因是jQuery只能对静态的DOM绑定事件，不能对动态生成的button绑定事件。
 //定时发送
+
 var timer;
 $('#Timer').change(function () {
         let msg = $('input#SendMsg').val();
@@ -296,6 +303,8 @@ $('button.btn').click(function() {
 });
 
 loadUI();
+SerialPortListInit();
+GlobalStatus = new status();
 loadSettings();
 var height = $('#left-page').css('height');
 $('#textArea').css('height',height);
