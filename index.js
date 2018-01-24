@@ -5,7 +5,9 @@ require('./node_modules/bootstrap/js/tab.js');
 var path = require('path');
 var fs = require('fs');
 var SerialPort = require('serialport');
+const Delimiter = SerialPort.parsers.Delimiter;//串口通信流定界字符
 
+textarea = document.getElementById('textArea');
 const BrowserWindow = require('electron').remote.BrowserWindow;
 
 const newWindowBtn = document.getElementById('new-window');
@@ -194,6 +196,9 @@ $('select,input').change(function () {
   }
 })
 
+
+var xold = 30;
+var yold = 20;
 //响应打开/关闭端口事件
 $('#ToggleSerial').click(function(){
     if ($(this).val()=='closed') {
@@ -213,19 +218,38 @@ $('#ToggleSerial').click(function(){
             $('#Send').removeAttr('disabled');
             $('.custom-button').removeAttr('disabled');
             $('select').attr('disabled','disabled');//禁止所有选择框
+            var xold = 30;
+            
             //设置接收过程
-            GlobalStatus.CurrentPort.on('readable', function (err) {
-              if(err) alert(err);
-              else {
-                textarea = document.getElementById('textArea');
-                let date = new Date();
-                textarea.append($('<p class="txtStyle">'+
-                date.toLocaleString()+' '+date.getMilliseconds()+'\n'+'</p>')[0]);
-                var content = GlobalStatus.CurrentPort.read(1);
-                textarea.append($('<p class="txtStyle txt">'+ content +'\n'+'</p>')[0]);
-                GlobalStatus.CoordinateRecord.push([content.readUInt8(),content.readUInt8()+20]);
+            const parser = GlobalStatus.CurrentPort.pipe(new Delimiter({ delimiter: Buffer.from('#') }));
+            parser.on('data', (data) => {
+              
+              var x = data[1] << 8 | data[0];
+              var y = data[3] << 8 | data[2];
+              if ((x - xold < 10)&& (y - yold <10)) {
+                GlobalStatus.CoordinateRecord.push([x,y]);
+                xold = x;
+                yold = y;
               }
+              
+              
+              let date = new Date();
+              textarea.append($('<p class="txtStyle">'+
+              date.toLocaleString()+' '+date.getMilliseconds()+'\n'+'</p>')[0]);
+              var content = GlobalStatus.CurrentPort.read(1);
+              textarea.append($('<p class="txtStyle txt">'+ x + ',' + y +'\n'+'</p>')[0]);
             });
+            // GlobalStatus.CurrentPort.on('readable', function (err) {
+            //   if(err) alert(err);
+            //   else {
+            //     textarea = document.getElementById('textArea');
+            //     let date = new Date();
+            //     textarea.append($('<p class="txtStyle">'+
+            //     date.toLocaleString()+' '+date.getMilliseconds()+'\n'+'</p>')[0]);
+            //     var content = GlobalStatus.CurrentPort.read(1);
+            //     textarea.append($('<p class="txtStyle txt">'+ content +'\n'+'</p>')[0]);
+            //   }
+            // });
           }
         }
       );
