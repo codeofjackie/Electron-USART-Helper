@@ -4,11 +4,11 @@
             "name":"测试",
             "button":[
                 {
-                    "tags":"Eat",
-                    "value":"Eat"
+                    "tags":"Power灯亮",
+                    "value":"#ONH"
                 },{
-                    "tags":"Sleep",
-                    "value":"Sleep"
+                    "tags":"Power灯灭",
+                    "value":"#OFH"
                 },{
                     "tags":"Run",
                     "value":"Run"

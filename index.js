@@ -7,6 +7,7 @@ var fs = require('fs');
 var SerialPort = require('serialport');
 const Delimiter = SerialPort.parsers.Delimiter;//串口通信流定界字符
 
+
 textarea = document.getElementById('textArea');
 const BrowserWindow = require('electron').remote.BrowserWindow;
 
@@ -118,7 +119,7 @@ function setCustomTabs(data) {
     for (let buttonindex = 0; buttonindex < tabc.button.length; buttonindex++) {
       let button = tabc.button[buttonindex];//获取第i个按钮信息
       var btn = $('<div class="col-sm-4 col-lg-4 col-md-4 ">\
-                      <button class="btn btn-danger form-control custom-button" disabled onclick="SendPreset(this)" value="'+button.value+'">'+button.tags+'</button>\
+                      <button class="btn btn-danger form-control custom-button" disabled value="'+button.value+'">'+button.tags+'</button>\
                     </div>')[0];
       //插入按钮
       row.append(btn);
@@ -218,7 +219,6 @@ $('#ToggleSerial').click(function(){
             $('#Send').removeAttr('disabled');
             $('.custom-button').removeAttr('disabled');
             $('select').attr('disabled','disabled');//禁止所有选择框
-            var xold = 30;
             
             //设置接收过程
             const parser = GlobalStatus.CurrentPort.pipe(new Delimiter({ delimiter: Buffer.from('#') }));
@@ -239,17 +239,19 @@ $('#ToggleSerial').click(function(){
               var content = GlobalStatus.CurrentPort.read(1);
               textarea.append($('<p class="txtStyle txt">'+ x + ',' + y +'\n'+'</p>')[0]);
             });
-            // GlobalStatus.CurrentPort.on('readable', function (err) {
-            //   if(err) alert(err);
-            //   else {
-            //     textarea = document.getElementById('textArea');
-            //     let date = new Date();
-            //     textarea.append($('<p class="txtStyle">'+
-            //     date.toLocaleString()+' '+date.getMilliseconds()+'\n'+'</p>')[0]);
-            //     var content = GlobalStatus.CurrentPort.read(1);
-            //     textarea.append($('<p class="txtStyle txt">'+ content +'\n'+'</p>')[0]);
-            //   }
-            // });
+            GlobalStatus.CurrentPort.on('close',(err)=>{
+              if (err) alert(err);
+              else {
+                $('#ToggleSerial').val('closed');
+                $('#ToggleSerial')[0].innerText = "打开串口";
+                $('#Send').attr('disabled','disabled');//禁用一般的发送按钮
+                var buttons = document.getElementsByClassName('custom-button');
+                for (let index = 0; index < buttons.length; index++) {
+                  buttons[index].setAttribute('disabled','disabled');
+                }
+                $('select').removeAttr('disabled');//恢复所有选择框
+              }
+            });
           }
         }
       );
@@ -257,12 +259,6 @@ $('#ToggleSerial').click(function(){
     else if($(this).val()=='opened') {
       GlobalStatus.CurrentPort.close((err)=>{
           if (err) alert(err);
-          else {
-            $('#ToggleSerial').val('closed');
-            $('#ToggleSerial')[0].innerText = "打开串口";
-            $('#Send').attr('disabled','disabled');//禁用一般的发送按钮
-            $('.button-custom').attr('disabled','disabled');//禁用自定义发送按钮
-          }
       });
       delete GlobalStatus.CurrentPort;
     }
@@ -283,13 +279,14 @@ function SendMsg(msg) {
 }
 //自定义按钮的发送
 function SendPreset(param) {
-  param.blur();
-  var msg = param.value;
+  param[0].blur();
+  var msg = param[0].value;
   if (msg!=""){
   //发送
   SendMsg(msg);
   }
 }
+
 //普通按钮发送
 $('button#Send').click(function () {
   var msg = $('input#SendMsg').val();
@@ -325,8 +322,12 @@ $('#Timer').change(function () {
 $('button.btn').click(function() {
   $(this).blur();
 });
-
+/* 初始化流程 */
 loadUI();
+$("#left-page").delegate("button.custom-button","click",function(){
+  SendPreset($(this));
+});
+
 SerialPortListInit();
 GlobalStatus = new status();
 loadSettings();
