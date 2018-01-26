@@ -8,7 +8,7 @@
     "install": "electron-rebuild"
   },
   "author": "codeofjackie",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "bootstrap": "3.3.7",
     "bootstrap-select": "^1.12.4",
