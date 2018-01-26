@@ -1,4 +1,4 @@
-Release v1.1.0
+## Release v1.1.0
 
 - 在串口拔出或者插入之后可以通过Ctrl+R刷新可获得串口的状态。（但同时也会关闭已经打开的串口）
 - 修改了打开串口和关闭串口之后下拉选框显示的一些bug
@@ -12,24 +12,43 @@ panel下的元素，name代表标签页的名字，button代表该标签页中�
 
 button下的元素，tags代表该按钮的名字，value代表发送时发送的值。
 
-开发说明
+## 开发说明
 
-安装git
+1. 安装git
 
-命令行
-git clone https://github.com/codeofjackie/Electron-USART-Helper.git
-#下载工程
+2. 命令行执行
 
-安装nodejs
+   ```powershell
+   git clone https://github.com/codeofjackie/Electron-USART-Helper.git
+   ```
 
-npm install
-#安装依赖
+   以下载工程
 
-全局安装electron
-npm  install electron -g
+3. 安装nodejs
 
-启动程序
-electron .
+4. 命令行执行
+
+   ```powershell
+   npm install
+   ```
+
+   以安装依赖
+
+5. 全局安装electron,命令行执行
+
+   ```powershell
+   npm install electron -g
+   ```
+
+6. 启动程序,命令行执行
+
+   ```powershell
+   electron .
+   ```
+
+   ​
+
+
 
 
 
