@@ -12,3 +12,24 @@ panel下的元素，name代表标签页的名字，button代表该标签页中�
 
 button下的元素，tags代表该按钮的名字，value代表发送时发送的值。
 
+开发说明
+
+安装git
+
+命令行
+git clone https://github.com/codeofjackie/Electron-USART-Helper.git
+#下载工程
+
+安装nodejs
+
+npm install
+#安装依赖
+
+全局安装electron
+npm  install electron -g
+
+启动程序
+electron .
+
+
+
