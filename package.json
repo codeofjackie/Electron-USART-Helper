@@ -1,24 +1,23 @@
 {
-  "name": "Port",
+  "name": "electron-serialporthelper",
   "version": "1.0.0",
   "description": "",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "install": "electron-rebuild"
+    "install": "electron-rebuild --version 2.0.5"
   },
   "author": "codeofjackie",
   "license": "MIT",
   "dependencies": {
     "bootstrap": "3.3.7",
-    "bootstrap-select": "^1.12.4",
-    "highcharts": "^6.0.4",
+    "bootstrap-select": "^1.13.1",
+    "highcharts": "^6.1.1",
     "jquery": "latest",
-    "materialize-css": "^0.100.2",
-    "serialport": "^6.0.4"
+    "serialport": "^6.2.1"
   },
   "devDependencies": {
-    "electron": "^1.7.3",
-    "electron-rebuild": "^1.7.3"
+    "electron": "^2.0.5",
+    "electron-rebuild": "^1.8.1"
   }
 }
